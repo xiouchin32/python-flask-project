@@ -41,6 +41,7 @@ def signup():
     })
     if result!=None:
         return redirect("/error?msg=Email already exists.")
+        # return Response({"text":"Email already exists."}, status=409, mimetype='application/json')
     #post data
     colletion.insert_one({
         "nickname":nickname,
