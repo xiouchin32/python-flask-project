@@ -1,4 +1,5 @@
 #connect db
+from typing import Collection
 import pymongo
 client = pymongo.MongoClient("mongodb+srv://root:root123@mycluster.j1zwl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 db = client.member_system
@@ -26,6 +27,27 @@ def member():
 def error():
     msg = request.args.get("msg","Error")
     return render_template("error.html",message=msg)
+
+@app.route("/signup",methods=["POST"])
+def signup():
+    #get info
+    nickname = request.form["nickname"]
+    email = request.form["email"]
+    password = request.form["password"]
+    #check info
+    colletion = db.user
+    result = colletion.find_one({
+        "email":email
+    })
+    if result!=None:
+        return redirect("/error?msg=Email already exists.")
+    #post data
+    colletion.insert_one({
+        "nickname":nickname,
+        "email":email,
+        "password":password
+    })
+    return redirect("/")
 
 
 app.run(port=8080)
