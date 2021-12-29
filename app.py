@@ -1,4 +1,5 @@
 #connect db
+import re
 from typing import Collection
 import pymongo
 client = pymongo.MongoClient("mongodb+srv://root:root123@mycluster.j1zwl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
@@ -20,7 +21,10 @@ def index():
 
 @app.route("/member")
 def member():
-    return render_template("member.html")
+    if "nickname" in session:
+        return render_template("member.html")
+    else :
+        return redirect("/")
 
 # / error?msg="error message"
 @app.route("/error")
@@ -50,5 +54,28 @@ def signup():
     })
     return redirect("/")
 
+@app.route("/signin",methods=["POST"])
+def signin():
+    #get input email and password
+    email = request.form["email"]
+    password = request.form["password"]
+    #check user
+    colletion = db.user
+    #check password
+    result = colletion.find_one({
+        "$and":[
+            {"email":email},
+            {"password":password}
+        ]
+    })
+    if result == None:
+        return redirect("/error?msg=Login Failed.")
+    session["nickname"] = result["nickname"]
+    return redirect("/member") 
+
+@app.route("/signout")
+def signout():
+    del session["nickname"]
+    return redirect("/")
 
 app.run(port=8080)
